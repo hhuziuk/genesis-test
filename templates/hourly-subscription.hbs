@@ -1,0 +1,23 @@
+<h2>Your Weekly Forecast for {{city}}</h2>
+<table cellpadding="5" cellspacing="0" border="1">
+    <thead>
+    <tr>
+        <th>Day</th>
+        <th>Min / Max (°C)</th>
+        <th>Conditions</th>
+    </tr>
+    </thead>
+    <tbody>
+    {{#each forecast}}
+        <tr>
+            <td>{{this.day}}</td>
+            <td>{{this.tempMin}} / {{this.tempMax}}</td>
+            <td>{{this.conditions}}</td>
+        </tr>
+    {{/each}}
+    </tbody>
+</table>
+
+<p>Hope you’re prepared for whatever the week brings!</p>
+<hr>
+<small>You can unsubscribe at any time <a href="{{unsubscribeUrl}}">here</a>.</small>
