@@ -12,5 +12,5 @@ export const PostgresDataSource: DataSource = new DataSource({
   logging: false,
   entities: [],
   subscribers: [],
-  migrations: [__dirname + './migrations/*{.ts,.js}'],
+  migrations: [__dirname + "./migrations/*{.ts,.js}"],
 });
