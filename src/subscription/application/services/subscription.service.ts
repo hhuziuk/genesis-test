@@ -9,7 +9,7 @@ import { CreateSubscriptionDto } from "@/weather/application/dto/create-subscrip
 import { ConfirmSubscriptionDto } from "@/weather/application/dto/confirm-subscription.dto";
 import { UnsubscribeDto } from "@/weather/application/dto/unsubscribe.dto";
 import { MailerService } from "@nestjs-modules/mailer";
-import { Cron, CronExpression } from "@nestjs/schedule";
+import { Cron } from "@nestjs/schedule";
 import { UpdateFrequency } from "@/shared/enums/frequency.enum";
 import { config } from "@/shared/configs/config";
 import { WeatherService } from "@/weather/application/services/weather.service";
@@ -29,37 +29,32 @@ export class SubscriptionService {
   }
 
   @Cron("0 * * * *", { timeZone: "Europe/Warsaw" })
-  async handleWeeklyNotifications() {
+  async handleHourlyNotifications() {
     await this.sendBatch(UpdateFrequency.HOURLY);
   }
 
   async subscribe(dto: CreateSubscriptionDto): Promise<void> {
-      const isSubbed = await this.repo.isEmailSubscribed(dto.email, dto.city);
-      if (isSubbed) {
-        throw new ConflictException("Email already subscribed");
-      }
-      const token = uuidv4();
-      const subscription = new Subscription(
-        uuidv4(),
-        dto.email,
-        dto.city,
-        dto.frequency,
-        false,
-        token,
-        new Date(),
-      );
-      await this.repo.create(subscription);
+    const isSubbed = await this.repo.isEmailSubscribed(dto.email, dto.city);
+    if (isSubbed) {
+      throw new ConflictException("Email already subscribed");
+    }
+    const token = uuidv4();
+    await this.repo.create(
+      new Subscription(uuidv4(), dto.email, dto.city, dto.frequency, false, token, new Date()),
+    );
 
-      const confirmUrl = `${config.app.baseUrl}/api/confirm/${token}`;
-      await this.mailer.sendMail({
-        to: dto.email,
-        subject: "Please confirm your weather subscription",
-        template: "confirm-subscription",
-        context: {
-          city: dto.city,
-          confirmUrl,
-        },
-      });
+    const confirmUrl = `${config.app.baseUrl}/api/confirm/${token}`;
+    const unsubscribeUrl = `${config.app.baseUrl}/api/unsubscribe/${token}`;
+    await this.mailer.sendMail({
+      to: dto.email,
+      subject: "Welcome! Confirm your weather subscription",
+      template: "confirm-subscription",
+      context: {
+        city: dto.city,
+        confirmUrl,
+        unsubscribeUrl,
+      },
+    });
   }
 
   async confirm(dto: ConfirmSubscriptionDto): Promise<void> {
@@ -77,13 +72,16 @@ export class SubscriptionService {
 
   private async sendBatch(frequency: UpdateFrequency) {
     const subs = await this.repo.findConfirmedByFrequency(frequency);
-
     for (const sub of subs) {
       const weather = await this.weatherService.getCurrent({ city: sub.city });
-      console.log(`Email sent to ${sub.email} for ${sub.city}`);
+      const unsubscribeUrl = `${config.app.baseUrl}/api/unsubscribe/${sub.token}`;
+
+      const greeting = frequency === UpdateFrequency.HOURLY ? "Hour" : "Morning";
 
       const context: any = {
+        greeting,
         city: sub.city,
+        unsubscribeUrl,
         weather: {
           temperature: weather.temperature,
           humidity: weather.humidity,

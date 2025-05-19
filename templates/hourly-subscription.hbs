@@ -1,23 +1,11 @@
-<h2>Your Weekly Forecast for {{city}}</h2>
-<table cellpadding="5" cellspacing="0" border="1">
-    <thead>
-    <tr>
-        <th>Day</th>
-        <th>Min / Max (°C)</th>
-        <th>Conditions</th>
-    </tr>
-    </thead>
-    <tbody>
-    {{#each forecast}}
-        <tr>
-            <td>{{this.day}}</td>
-            <td>{{this.tempMin}} / {{this.tempMax}}</td>
-            <td>{{this.conditions}}</td>
-        </tr>
-    {{/each}}
-    </tbody>
-</table>
+<h2>Good {{greeting}}!</h2>
+<p>Here’s your weather forecast for this hour in <strong>{{city}}</strong>:</p>
 
-<p>Hope you’re prepared for whatever the week brings!</p>
+<ul>
+    <li>🌡️ Temperature: {{weather.temperature}} °C</li>
+    <li>💧 Humidity: {{weather.humidity}}%</li>
+    <li>☁️ Conditions: {{weather.description}}</li>
+</ul>
+
 <hr>
-<small>You can unsubscribe at any time <a href="{{unsubscribeUrl}}">here</a>.</small>
+<small>If you no longer wish to receive these emails, you can unsubscribe <a href="{{unsubscribeUrl}}">here</a>.</small>

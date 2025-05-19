@@ -8,9 +8,9 @@ export const PostgresDataSource: DataSource = new DataSource({
   username: config.db.user,
   password: config.db.password,
   database: config.db.database,
-  synchronize: true,
+  synchronize: false,
   logging: false,
   entities: [],
   subscribers: [],
-  migrations: [],
+  migrations: [__dirname + './migrations/*{.ts,.js}'],
 });
